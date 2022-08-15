@@ -21,6 +21,7 @@ from app.models.domain.users import User
 
 SELLER_USERNAME_ALIAS = "seller_username"
 SLUG_ALIAS = "slug"
+TITLE_ALIAS = "title"
 
 CAMEL_OR_SNAKE_CASE_TO_WORDS = r"^[a-z\d_\-]+|[A-Z\d_\-][^A-Z\d_\-]*"
 
@@ -109,6 +110,7 @@ class ItemsRepository(BaseRepository):  # noqa: WPS214
         limit: int = 20,
         offset: int = 0,
         requested_user: Optional[User] = None,
+        title: Optional[str] = None
     ) -> List[Item]:
         query_params: List[Union[str, int]] = []
         query_params_count = 0
@@ -196,6 +198,15 @@ class ItemsRepository(BaseRepository):  # noqa: WPS214
                 ),
             )
             # fmt: on
+
+        if title:
+            query_params.append(title)
+            query_params_count += 1
+
+            # fmt: off
+            query = query.where(
+                Parameter(query_params_count) in items.title
+            )
 
         query = query.limit(Parameter(query_params_count + 1)).offset(
             Parameter(query_params_count + 2),
